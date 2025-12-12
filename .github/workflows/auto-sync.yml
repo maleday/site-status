@@ -27,7 +27,7 @@ jobs:
         with:
           upstream_sync_repo: imsyy/site-status # 上游仓库地址 (必须填对)
           upstream_sync_branch: master    # 上游仓库的分支 (通常是 main 或 master)
-          target_sync_branch: main      # 你仓库的分支
+          target_sync_branch: master      # 你仓库的分支
           target_repo_token: ${{ secrets.GITHUB_TOKEN }} # 自动生成的 Token，无需修改
 
           # 设置为 false 以便在有冲突时失败，而不是强制覆盖你的修改

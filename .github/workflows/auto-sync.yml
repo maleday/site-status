@@ -1,0 +1,42 @@
+name: Upstream Sync
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    # 这里的 cron 设置为每 12 小时运行一次
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 允许手动点击按钮触发
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      # 第一步：检出你的代码
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+
+      # 第二步：运行同步动作
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          upstream_sync_repo: imsyy/site-status # 上游仓库地址 (必须填对)
+          upstream_sync_branch: main    # 上游仓库的分支 (通常是 main 或 master)
+          target_sync_branch: main      # 你仓库的分支
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }} # 自动生成的 Token，无需修改
+
+          # 设置为 false 以便在有冲突时失败，而不是强制覆盖你的修改
+          test_mode: false
+
+      # 第三步：如果同步失败（通常是因为有冲突），显示提示
+      - name: Sync check
+        if: failure()
+        run: |
+          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync 一次才能重新开启。"
+          echo "[Error] 或者你修改了仓库文件导致冲突。"
+          exit 1
